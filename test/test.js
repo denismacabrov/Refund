@@ -31,19 +31,18 @@ describe("Gas Refund", function() {
         await mockRouter.deployed();
 
         let PairAddress = await mockFactory.callStatic.createPair(token1.address, token2.address);
-        console.log(PairAddress);
         TX = await mockFactory.createPair(token1.address, token2.address);
         let MockPair = await ethers.getContractFactory("mockPair");
         mockPair = await MockPair.attach(PairAddress);
-        // console.log(await mockPair.getReserves());
 
-        TX = await token1.approve(mockRouter.address, 2000);
+        TX = await token1.approve(mockRouter.address, BigNumber.from("1000000000000000000000000"));
         TX.wait();
-        TX = await token2.approve(mockRouter.address, 2000);
+        TX = await token2.approve(mockRouter.address, BigNumber.from("1000000000000000000000000"));
         TX.wait();
         let lastBlock = await ethers.provider.getBlock("latest");
         let lastBlockTime = lastBlock.timestamp;
-        TX = await mockRouter.addLiquidity(token1.address, token2.address, 2000, 2000, 1500, 1500, owner.address, lastBlockTime + 10000);
+        TX = await mockRouter.addLiquidity(token1.address, token2.address, BigNumber.from("1000000000000000000000000"), BigNumber.from("1000000000000000000000000"), 
+                                                                            BigNumber.from("900000000000000000000000"), BigNumber.from("900000000000000000000000"), owner.address, lastBlockTime + 60);
         await TX.wait();
         
     });
