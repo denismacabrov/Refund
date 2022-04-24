@@ -4,12 +4,14 @@ const { ethers } = require("hardhat");
 
 let token1, token2;
 let mockFactory, mockRouter, mockWETH, mockPair;
+let refund;
 let owner, alice, bob;
 
 describe("Gas Refund", function() {
     beforeEach(async () => {
         [owner, alice, bob] = await ethers.getSigners();
         
+        //mock tokens for Uniswap
         let Token1 = await ethers.getContractFactory("Token1");
         token1 = await Token1.deploy();
         await token1.deployed();
@@ -18,6 +20,7 @@ describe("Gas Refund", function() {
         token2 = await Token2.deploy();
         await token2.deployed();
 
+        // mock Uniswap
         let MockWeth = await ethers.getContractFactory("mockWeth");
         mockWETH = await MockWeth.deploy();
         await mockWETH.deployed();
@@ -44,10 +47,15 @@ describe("Gas Refund", function() {
         TX = await mockRouter.addLiquidity(token1.address, token2.address, BigNumber.from("1000000000000000000000000"), BigNumber.from("1000000000000000000000000"), 
                                                                             BigNumber.from("900000000000000000000000"), BigNumber.from("900000000000000000000000"), owner.address, lastBlockTime + 60);
         await TX.wait();
+
+        // refund contract
+        let Refund = await ethers.getContractFactory("Refund");
+        refund = await Refund.deploy();
+        await refund.deployed();
         
     });
 
-    describe("Mock Tocken", function() {
+    describe("Mock Uniswap", function() {
         it("Total supply must be exact", async () => {
             expect(await token1.totalSupply()).to.equal(BigNumber.from("2000000000000000000000000"));
             expect(await token2.totalSupply()).to.equal(BigNumber.from("2000000000000000000000000"));
@@ -56,6 +64,16 @@ describe("Gas Refund", function() {
             let TX = await token1.transfer(alice.address, 1000);
             await TX.wait();
             expect(await token1.balanceOf(alice.address)).to.equal(1000);
+        });
+    });
+
+    describe("Gas Refund", function() {
+        it("Calculate gas used in consumeGas function", async() => {
+            let TX = await refund.setStorage();
+            TX.wait();
+            TX = await refund.consumeGas(100000);
+            let receipt = await TX.wait();
+            console.log("Total transation gas used: " + receipt.cumulativeGasUsed);
         });
     });
 });
