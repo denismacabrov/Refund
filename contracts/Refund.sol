@@ -8,10 +8,7 @@ contract Refund {
     modifier calculateGas {
         uint256 gas = gasleft();
         _;
-        assembly {
-            sstore(0,0)
-        }
-        console.log("Gas used: %d", gas - gasleft());
+        console.log("Gas used during transaction execution: %d", gas - gasleft());
     }
 
     function setStorage() public {
@@ -24,5 +21,14 @@ contract Refund {
         uint iter = (_gas - 400) / 176;
         for (uint i = 0; i < iter; i++) {}
     }
+
+    function consumeGasRefund(uint _gas) public calculateGas {
+        uint iter = (_gas - 400) / 176;
+        for (uint i = 0; i < iter; i++) {}
+        assembly {
+            sstore(0,0)
+        }
+    }
+
 
 }

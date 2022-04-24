@@ -69,11 +69,16 @@ describe("Gas Refund", function() {
 
     describe("Gas Refund", function() {
         it("Calculate gas used in consumeGas function", async() => {
-            let TX = await refund.setStorage();
-            TX.wait();
             TX = await refund.consumeGas(100000);
             let receipt = await TX.wait();
             console.log("Total transation gas used: " + receipt.cumulativeGasUsed);
+        });
+        it("Calculate gas used in consumeGasRefund function", async() => {
+            let TX = await refund.setStorage();
+            TX.wait();
+            TX = await refund.consumeGasRefund(100000);
+            let receipt = await TX.wait();
+            console.log("Total transation gas used (with refund):" + receipt.cumulativeGasUsed);
         });
     });
 });
